@@ -1,17 +1,17 @@
 {
-  "name": "free-tools-suvo",
-  "version": "1.0.0",
-  "description": "free pesa nehi lagta saport @nice_osei",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "postinstall": "npx puppeteer browsers install chrome"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "puppeteer": "^23.0.0"
-  }
+"name": "free-tools-suvo",
+"version": "1.0.0",
+"description": "free pesa nehi lagta saport @nice_osei",
+"main": "server.js",
+"scripts": {
+"start": "node server.js",
+"postinstall": "npx puppeteer browsers install chrome"
+},
+"engines": {
+"node": ">=18"
+},
+"dependencies": {
+"express": "^4.19.2",
+"puppeteer": "^23.0.0"
+}
 }
