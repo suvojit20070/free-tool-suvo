@@ -4,7 +4,8 @@
   "description": "free pesa nehi lagta saport @nice_osei",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "engines": {
     "node": ">=18"
