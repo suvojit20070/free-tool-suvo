@@ -7,6 +7,15 @@ const net = require("net");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS: allow all origins
+app.use((req, res, next) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
 let browserPromise = null;
 
 function getBrowser() {
@@ -22,7 +31,6 @@ function getBrowser() {
         ],
       })
       .then((browser) => {
-        // If Chrome crashes/disconnects, relaunch on next request
         browser.on("disconnected", () => {
           browserPromise = null;
         });
@@ -179,7 +187,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => console.log(`Server running on port ${PORT}`));
 
 async function shutdown() {
   if (browserPromise) {
