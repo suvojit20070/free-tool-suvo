@@ -11,10 +11,27 @@ let browserPromise = null;
 
 function getBrowser() {
   if (!browserPromise) {
-    browserPromise = puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-    });
+    browserPromise = puppeteer
+      .launch({
+        headless: "new",
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+        ],
+      })
+      .then((browser) => {
+        // If Chrome crashes/disconnects, relaunch on next request
+        browser.on("disconnected", () => {
+          browserPromise = null;
+        });
+        return browser;
+      })
+      .catch((err) => {
+        browserPromise = null;
+        throw err;
+      });
   }
   return browserPromise;
 }
@@ -33,7 +50,16 @@ function isPrivateIp(ip) {
   }
   if (net.isIPv6(ip)) {
     const l = ip.toLowerCase();
-    return l === "::1" || l.startsWith("fc") || l.startsWith("fd") || l.startsWith("fe80");
+    return (
+      l === "::1" ||
+      l === "::" ||
+      l.startsWith("fc") ||
+      l.startsWith("fd") ||
+      l.startsWith("fe80") ||
+      l.startsWith("::ffff:127.") ||
+      l.startsWith("::ffff:10.") ||
+      l.startsWith("::ffff:192.168.")
+    );
   }
   return true;
 }
@@ -155,7 +181,15 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-process.on("SIGINT", async () => {
-  if (browserPromise) (await browserPromise).close().catch(() => {});
+async function shutdown() {
+  if (browserPromise) {
+    try {
+      const browser = await browserPromise;
+      await browser.close();
+    } catch {}
+  }
   process.exit(0);
-});
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
